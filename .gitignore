@@ -1,0 +1,16 @@
+# Data (trop lourd pour Git)
+DATA/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Elasticsearch data volume
+esdata/
+
+# OS
+.DS_Store
+Thumbs.db

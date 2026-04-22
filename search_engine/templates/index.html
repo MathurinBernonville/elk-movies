@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 Movie Search Engine</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body   { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e5e5e5; padding: 40px 20px; }
+    h1     { color: #e50914; font-size: 2rem; margin-bottom: 24px; }
+    .bar   { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    input  { padding: 10px 14px; background: #1a1a1a; color: #fff; border: 1px solid #333;
+             border-radius: 6px; font-size: 0.95rem; }
+    input:focus { outline: none; border-color: #e50914; }
+    button { padding: 10px 22px; background: #e50914; color: #fff; border: none;
+             border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 600; }
+    button:hover { background: #b20710; }
+    #total { color: #888; margin-bottom: 12px; font-size: 0.9rem; }
+    .card  { background: #1a1a1a; border-radius: 8px; padding: 18px 20px;
+             margin-bottom: 14px; border-left: 4px solid #e50914; }
+    .card h3   { font-size: 1.1rem; margin-bottom: 6px; }
+    .overview  { font-size: 0.88rem; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
+    .meta      { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .tag       { background: #2a2a2a; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; color: #ccc; }
+    .rating    { color: #f5c518; font-weight: 700; margin-left: auto; font-size: 0.95rem; }
+    .score     { color: #555; font-size: 0.78rem; }
+    #pagination { margin-top: 20px; display: flex; gap: 10px; align-items: center; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>🎬 Movie Search Engine</h1>
+  <div class="bar">
+    <input id="q"        type="text"   placeholder="Titre, description…"  style="width:260px">
+    <input id="genre"    type="text"   placeholder="Genre  (ex: Action)"   style="width:160px">
+    <input id="language" type="text"   placeholder="Langue (ex: en, fr)"   style="width:140px">
+    <input id="year"     type="number" placeholder="Année"                 style="width:90px" min="1900" max="2030">
+    <button onclick="doSearch(1)">🔍 Rechercher</button>
+  </div>
+  <div id="total"></div>
+  <div id="results"></div>
+  <div id="pagination"></div>
+
+  <script>
+    let currentPage = 1;
+
+    async function doSearch(page = 1) {
+      currentPage = page;
+      const params = new URLSearchParams({
+        q:        document.getElementById("q").value,
+        genre:    document.getElementById("genre").value,
+        language: document.getElementById("language").value,
+        year:     document.getElementById("year").value,
+        page
+      });
+      const data = await fetch(`/search?${params}`).then(r => r.json());
+
+      document.getElementById("total").textContent =
+        `${data.total.toLocaleString()} résultat(s)`;
+
+      document.getElementById("results").innerHTML = data.results.map(m => `
+        <div class="card">
+          <h3>${m.title}</h3>
+          <p class="overview">${m.overview || "Pas de description."}…</p>
+          <div class="meta">
+            ${(m.genres || []).map(g => `<span class="tag">${g}</span>`).join("")}
+            ${m.language ? `<span class="tag">🌐 ${m.language}</span>` : ""}
+            ${m.date ? `<span class="tag">📅 ${m.date.substring(0,4)}</span>` : ""}
+            <span class="score">ES score: ${m.score}</span>
+            <span class="rating">★ ${m.rating || "N/A"}</span>
+          </div>
+        </div>
+      `).join("") || "<p style='color:#888'>Aucun résultat.</p>";
+
+      const totalPages = Math.ceil(data.total / 10);
+      document.getElementById("pagination").innerHTML =
+        (page > 1 ? `<button onclick="doSearch(${page-1})">← Précédent</button>` : "") +
+        `<span>Page ${page} / ${totalPages || 1}</span>` +
+        (page < totalPages ? `<button onclick="doSearch(${page+1})">Suivant →</button>` : "");
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter") doSearch(1);
+    });
+  </script>
+</body>
+</html>

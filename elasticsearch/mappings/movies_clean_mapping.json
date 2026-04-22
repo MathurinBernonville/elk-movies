@@ -1,0 +1,52 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "movie_text_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding", "movie_stop_words", "movie_stemmer"]
+        },
+        "keyword_lowercase": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": ["lowercase", "trim"]
+        }
+      },
+      "filter": {
+        "movie_stop_words": {
+          "type": "stop",
+          "stopwords": ["the", "a", "an", "and", "or", "of", "in", "to"]
+        },
+        "movie_stemmer": {
+          "type": "stemmer",
+          "language": "english"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id":                   { "type": "integer" },
+      "title":                { "type": "text", "analyzer": "movie_text_analyzer",
+                                "fields": { "keyword": { "type": "keyword" } } },
+      "overview":             { "type": "text", "analyzer": "movie_text_analyzer" },
+      "tagline":              { "type": "text", "analyzer": "movie_text_analyzer" },
+      "original_language":    { "type": "keyword" },
+      "status":               { "type": "keyword" },
+      "genres":               { "type": "keyword" },
+      "keywords":             { "type": "keyword" },
+      "production_companies": { "type": "keyword" },
+      "cast":                 { "type": "keyword" },
+      "release_date":         { "type": "date", "format": "strict_date_optional_time||yyyy-MM-dd" },
+      "popularity":           { "type": "float" },
+      "vote_average":         { "type": "float" },
+      "vote_count":           { "type": "integer" },
+      "budget":               { "type": "long" },
+      "revenue":              { "type": "long" },
+      "runtime":              { "type": "integer" }
+    }
+  }
+}
