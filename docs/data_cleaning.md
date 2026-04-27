@@ -22,13 +22,13 @@
 
 ## Mesure d'impact avant/après nettoyage
 
-| Métrique                         | movies_raw | movies_clean |
-|----------------------------------|------------|--------------|
-| Nombre de documents              | À compléter après ingestion | À compléter |
-| Champs genres sous forme de liste| ❌ string JSON | ✅ keyword[] |
-| budget/revenue exploitables      | ❌ 0 = ambigu | ✅ null = absent |
-| release_date triable             | ❌ string    | ✅ date ES   |
-| Recherche full-text optimisée    | ❌ non       | ✅ analyzer  |
+| Métrique                         | movies_raw    | movies_clean  |
+|----------------------------------|---------------|---------------|
+| Nombre de documents              | 662 083       | 662 083       |
+| Champs genres sous forme de liste| ❌ string CSV  | ✅ keyword[]  |
+| budget/revenue exploitables      | ❌ 0 = ambigu  | ✅ typé float |
+| release_date triable             | ❌ string      | ✅ date ES    |
+| Recherche full-text optimisée    | ❌ non         | ✅ analyzer   |
 
 > **Note** : compléter les counts après ingestion avec :
 > `curl http://localhost:9200/movies_raw/_count`
