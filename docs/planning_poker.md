@@ -5,7 +5,7 @@
 > plusieurs perspectives (développeur, data engineer, utilisateur final)
 > afin de respecter l'esprit de la méthode.
 
-- Membre unique : [TON PRÉNOM] — Lead technique, data engineer, rédacteur
+- Membre unique : Mathurin Bernonville — Lead technique, data engineer, rédacteur
 
 ## 2) Échelle utilisée
 Fibonacci : 1, 2, 3, 5, 8, 13
