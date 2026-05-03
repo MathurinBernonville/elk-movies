@@ -15,6 +15,7 @@ def search():
     genre    = request.args.get("genre", "")
     language = request.args.get("language", "")
     year     = request.args.get("year", "")
+    sort     = request.args.get("sort", "score")
     page     = int(request.args.get("page", 1))
     size     = 10
     from_    = (page - 1) * size
@@ -26,7 +27,7 @@ def search():
         must_clauses.append({
             "multi_match": {
                 "query":     q,
-                "fields":    ["title^3", "overview", "tagline"],
+                "fields":    ["title^3", "overview", "tagline", "cast^2"],
                 "type":      "best_fields",
                 "fuzziness": "AUTO"
             }
@@ -48,6 +49,16 @@ def search():
             }
         })
 
+    # Tri
+    sort_config = []
+    if sort == "rating":
+        sort_config = [{"vote_average": {"order": "desc"}}, {"vote_count": {"order": "desc"}}]
+    elif sort == "popularity":
+        sort_config = [{"popularity": {"order": "desc"}}]
+    elif sort == "date":
+        sort_config = [{"release_date": {"order": "desc"}}]
+    # score = tri par défaut ES
+
     body = {
         "from":  from_,
         "size":  size,
@@ -58,22 +69,31 @@ def search():
             }
         },
         "_source": [
-            "title", "overview", "genres", "original_language",
-            "release_date", "vote_average", "vote_count", "popularity"
+            "title", "overview", "tagline", "genres", "original_language",
+            "release_date", "vote_average", "vote_count", "popularity",
+            "runtime", "cast", "status"
         ]
     }
+
+    if sort_config:
+        body["sort"] = sort_config
 
     resp    = es.search(index=IDX, body=body)
     hits    = resp["hits"]["hits"]
     total   = resp["hits"]["total"]["value"]
     results = [{
         "title":    h["_source"].get("title", "N/A"),
-        "overview": (h["_source"].get("overview", "") or "")[:200],
+        "overview": h["_source"].get("overview") or "",
+        "tagline":  h["_source"].get("tagline") or "",
         "genres":   h["_source"].get("genres", []),
         "language": h["_source"].get("original_language", ""),
         "date":     str(h["_source"].get("release_date", ""))[:10],
         "score":    round(h.get("_score") or 0, 2),
         "rating":   h["_source"].get("vote_average", 0),
+        "votes":    h["_source"].get("vote_count", 0),
+        "popularity": h["_source"].get("popularity", 0),
+        "runtime":  h["_source"].get("runtime"),
+        "cast":     h["_source"].get("cast", []),
     } for h in hits]
 
     return jsonify({"total": total, "results": results, "page": page})
